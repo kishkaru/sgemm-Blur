@@ -28,10 +28,7 @@ void *matmuld_worker(void *arg)
     }
 }
 
-void pthread_matmuld(double **a,
-		     double **b,
-		     double **c,
-		     int nthr)
+void pthread_matmuld(double **a, double **b, double **c, int nthr)
 {
   /* CS194: use pthreads to launch 
    * matrix multply worker threads.
@@ -39,16 +36,33 @@ void pthread_matmuld(double **a,
    * The structure and worker function
    * are good hints...
    */
-  pthread_t *thr = new pthread_t[nthr];
+  pthread_t *thr = new pthread_t[nthr];	//thread handle/#threads
   worker_t *tInfo = new worker_t[nthr];
 
-  tInfo[0].a = a;
-  tInfo[0].b = b;
-  tInfo[0].c = c;
-  tInfo[0].start = 0;
-  tInfo[0].end = 1024;
-  matmuld_worker((void*)tInfo);
-  
+	for(int i=1; i <= nthr; i++){
+		tInfo[i].a = a;
+		tInfo[i].b = b;
+		tInfo[i].c = c;
+		tInfo[i].start = i-1;
+		tInfo[i].end = 1024/i;
+	
+		pthread_create(&thr[i], NULL, matmuld_worker, &tInfo[i]);
+	}
+	
+	for(int i=0; i < nthr; i++){
+		pthread_join(thr[i], NULL);
+	}
+	
+	pthread_exit(NULL);
+	
   delete [] thr;
   delete [] tInfo;
 }
+
+  // tInfo[0].a = a;
+  // tInfo[0].b = b;
+  // tInfo[0].c = c;
+  // tInfo[0].start = 0;
+  // tInfo[0].end = 1024;
+  // matmuld_worker((void*)tInfo);
+  
