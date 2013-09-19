@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <cassert>
+#include <cstdio>
 
 typedef struct
 {
@@ -38,31 +39,35 @@ void pthread_matmuld(double **a, double **b, double **c, int nthr)
    */
   pthread_t *thr = new pthread_t[nthr];	//thread handle/#threads
   worker_t *tInfo = new worker_t[nthr];
-
-	for(int i=1; i <= nthr; i++){
+	
+	for(int i=1; i < nthr; i++){
+		printf("im inside \n");
 		tInfo[i].a = a;
 		tInfo[i].b = b;
 		tInfo[i].c = c;
-		tInfo[i].start = i-1;
-		tInfo[i].end = 1024/i;
-	
+		tInfo[i].start = (i * 1024)/nthr;
+		tInfo[i].end = ((i+1) * 1024)/nthr;
 		pthread_create(&thr[i], NULL, matmuld_worker, &tInfo[i]);
 	}
 	
+	printf("im outside \n");
+	tInfo[0].a = a;
+	tInfo[0].b = b;
+	tInfo[0].c = c;
+	tInfo[0].start = (0 * 1024)/nthr;
+	tInfo[0].end = ((0+1) * 1024)/nthr;
+	pthread_create(&thr[0], NULL, matmuld_worker, &tInfo[0]);
+	
+	printf("im joining \n");
 	for(int i=0; i < nthr; i++){
 		pthread_join(thr[i], NULL);
 	}
 	
 	pthread_exit(NULL);
+	printf("iv joined \n");
 	
   delete [] thr;
   delete [] tInfo;
 }
 
-  // tInfo[0].a = a;
-  // tInfo[0].b = b;
-  // tInfo[0].c = c;
-  // tInfo[0].start = 0;
-  // tInfo[0].end = 1024;
-  // matmuld_worker((void*)tInfo);
   
