@@ -5,8 +5,10 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <time.h>
+#include <omp.h>
 
 #include "readjpeg.h"
+#include "counters.h"
 
 typedef struct
 {
@@ -22,47 +24,50 @@ double timestamp()
   return tv.tv_sec + 1e-6*tv.tv_usec;
 }
 
-void blur_frame(int width, int height, int* blur_radii,
-		pixel_t *in, pixel_t *out)
-{
-  pixel_t t;
-
-  for(int y = 0; y < height; y++)
-    {
-      for(int x = 0; x < width; x++)
-	{
-	  int idx = y * width + x;
-	  int r = blur_radii[idx];
-	  memset(&t,0,sizeof(t));
-
-	  for(int yy = y-r; yy < y+r; yy++)
-	    {
-	      if(yy < 0 || yy >= height)
-		continue;
-	      
-	      for(int xx = x-r; xx < x+r; xx++)
-		{
-		  if(xx < 0 || xx >= width)
-		    continue;
-		  
-		  t.r += in[yy*width + xx].r;
-		  t.g += in[yy*width + xx].g;
-		  t.b += in[yy*width + xx].b;
-
+void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *out){
+	
+	// hwCounter_t c1;
+	// c1.init = false;
+	// initTicks(c1);
+	
+	omp_set_num_threads(16);
+	
+	// uint64_t time = getTicks(c1);
+	#pragma omp parallel for
+	for(int y = 0; y < height; y++){
+		for(int x = 0; x < width; x++){
+			pixel_t t;
+			int idx = y * width + x;
+			int r = blur_radii[idx];
+			memset(&t,0,sizeof(t));
+			
+			for(int yy = y-r; yy < y+r; yy++){
+				if(yy < 0 || yy >= height)
+					continue;
+			  
+				for(int xx = x-r; xx < x+r; xx++){
+					if(xx < 0 || xx >= width)
+						continue;
+				  
+				t.r += in[yy*width + xx].r;
+				t.g += in[yy*width + xx].g;
+				t.b += in[yy*width + xx].b;
+				}
+			}
+		  /* scale output (normalize) */
+			float scale = (float)((2*r + 1)*(2*r+1));
+		  //printf("r=%d, scale = %f\n", r, scale);
+			
+			scale = 1.0f / scale;
+			t.r *= scale;
+			t.g *= scale;
+			t.b *= scale;
+			
+			out[idx] = t;
 		}
-	    }
-	  /* scale output (normalize) */
-	  float scale = (float)((2*r + 1)*(2*r+1));
-	  //printf("r=%d, scale = %f\n", r, scale);
-
-	  scale = 1.0f / scale;
-	  t.r *= scale;
-	  t.g *= scale;
-	  t.b *= scale;
-
-	  out[idx] = t;
 	}
-    }
+	// uint64_t elapsed = getTicks(c1) - time;
+	// printf("%lu \n", elapsed);
 }
 
 void convert_to_pixel(pixel_t *out, frame_ptr in)

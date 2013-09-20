@@ -1,7 +1,10 @@
-OBJS=conv2d.o readjpeg.o
+OBJS=conv2d.o readjpeg.o counters.o
 
 %.o: %.cpp readjpeg.h
-	g++ -O2 -c $<
+	g++ -fopenmp -O3 -c $<
 
 all: $(OBJS)
-	g++ $(OBJS) -o conv2d -ljpeg
+	g++ -pthread -fopenmp -O3 $(OBJS) -o conv2d -ljpeg
+
+clean:
+	rm -rf conv2d $(OBJS)
