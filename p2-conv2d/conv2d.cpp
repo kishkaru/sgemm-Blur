@@ -26,13 +26,9 @@ double timestamp()
 
 void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *out){
 	
-	// hwCounter_t c1;
-	// c1.init = false;
-	// initTicks(c1);
-	
 	omp_set_num_threads(16);
+	//int counter = 0;
 	
-	// uint64_t time = getTicks(c1);
 	#pragma omp parallel for
 	for(int y = 0; y < height; y++){
 		for(int x = 0; x < width; x++){
@@ -52,6 +48,7 @@ void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *ou
 				t.r += in[yy*width + xx].r;
 				t.g += in[yy*width + xx].g;
 				t.b += in[yy*width + xx].b;
+				//counter += 3;
 				}
 			}
 		  /* scale output (normalize) */
@@ -63,11 +60,12 @@ void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *ou
 			t.g *= scale;
 			t.b *= scale;
 			
+			//counter += 3;
+			
 			out[idx] = t;
 		}
 	}
-	// uint64_t elapsed = getTicks(c1) - time;
-	// printf("%lu \n", elapsed);
+	//printf("%d \n", counter);
 }
 
 void convert_to_pixel(pixel_t *out, frame_ptr in)
