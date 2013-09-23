@@ -53,6 +53,7 @@ void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *ou
 			}
 		  /* scale output (normalize) */
 			float scale = (float)((2*r + 1)*(2*r+1));
+			//counter++;
 		  //printf("r=%d, scale = %f\n", r, scale);
 			
 			scale = 1.0f / scale;
@@ -60,7 +61,7 @@ void blur_frame(int width, int height, int* blur_radii, pixel_t *in, pixel_t *ou
 			t.g *= scale;
 			t.b *= scale;
 			
-			//counter += 3;
+			//counter += 4;
 			
 			out[idx] = t;
 		}
