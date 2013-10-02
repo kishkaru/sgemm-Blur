@@ -36,7 +36,7 @@ void simple_blur(float* out, int n, float* frame, int* radii){
 
 // My Blur
 void my_blur(float* out, int n, float* frame, int* radii){
-	omp_set_num_threads(8);
+	omp_set_num_threads(16);
 	
 	#pragma omp parallel for
 	for(int r=0; r<n; r++)
@@ -45,7 +45,7 @@ void my_blur(float* out, int n, float* frame, int* radii){
 			int num = 0;
 			float avg = 0;
 
-			float* avgg = new float[4];
+			float avgg[4];
 			__m128 vecAvg = _mm_setzero_ps();
 
 			for(int r2=max(0,r-rd); r2<=min(n-1,r+rd); r2++)

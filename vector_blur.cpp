@@ -42,7 +42,7 @@ void my_blur(float* out, int n, float* frame, int* radii){
 			int num = 0;
 			float avg = 0;
 
-			float* avgg = new float[4];
+			float avgg[4];
 			__m128 vecAvg = _mm_setzero_ps();
 
 			for(int r2=max(0,r-rd); r2<=min(n-1,r+rd); r2++)
