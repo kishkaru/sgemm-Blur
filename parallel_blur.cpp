@@ -36,6 +36,9 @@ void simple_blur(float* out, int n, float* frame, int* radii){
 
 // My Blur
 void my_blur(float* out, int n, float* frame, int* radii){
+	omp_set_num_threads(16);
+	
+	#pragma omp parallel for
 	for(int r=0; r<n; r++)
 		for(int c=0; c<n; c++){		
 			int rd = radii[r*n+c];
